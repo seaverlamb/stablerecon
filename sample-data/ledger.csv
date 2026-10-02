@@ -1,0 +1,5 @@
+transaction_id,customer,amount,currency,date,reference
+txn_001,Acme Inc,5000.00,USD,2026-10-01,INV-1001
+txn_002,Globex Corp,7500.00,USD,2026-10-01,INV-1002
+txn_003,Wayne Enterprises,2000.00,USD,2026-10-01,INV-1003
+txn_004,Stark Industries,10000.00,USD,2026-10-01,INV-1004
