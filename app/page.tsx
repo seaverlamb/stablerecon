@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useCallback,
   useEffect,
   useState,
 } from "react";
@@ -19,21 +20,10 @@ import { ReconciliationResult } from "@/types/transactions";
 import ReconciliationSummary from "@/components/ReconciliationSummary";
 import ExceptionTable from "@/components/ExceptionTable";
 import ExceptionDrawer from "@/components/ExceptionDrawer";
-
-type RunSummary = {
-  id: string;
-  createdAt: string;
-  ledgerFileName:
-    | string
-    | null;
-  stablecoinFileName:
-    | string
-    | null;
-  total: number;
-  matched: number;
-  exceptions: number;
-  openExceptions: number;
-};
+import RunHistory, {
+  RunSummary,
+} from "@/components/RunHistory";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
 
 const LEDGER_REQUIRED_COLUMNS = [
   "transaction_id",
@@ -114,35 +104,36 @@ export default function Home() {
       null
     );
 
-  async function loadHistory() {
-    try {
-      const response =
-        await fetch(
-          "/api/runs/history"
+  const loadHistory =
+    useCallback(async () => {
+      try {
+        const response =
+          await fetch(
+            "/api/runs/history"
+          );
+
+        const data =
+          await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.error ||
+              "Unable to load run history."
+          );
+        }
+
+        setRunHistory(
+          Array.isArray(data.runs)
+            ? data.runs
+            : []
         );
-
-      const data =
-        await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.error ||
-            "Unable to load run history."
+      } catch (error) {
+        console.error(
+          "Load history error:",
+          error
         );
       }
-
-      setRunHistory(
-        Array.isArray(data.runs)
-          ? data.runs
-          : []
-      );
-    } catch (error) {
-      console.error(
-        "Load history error:",
-        error
-      );
-    }
-  }
+    }, []);
 
   useEffect(() => {
     async function loadInitialData() {
@@ -191,7 +182,7 @@ export default function Home() {
     }
 
     loadInitialData();
-  }, []);
+  }, [loadHistory]);
 
   async function handleReconcile() {
     if (
@@ -312,6 +303,12 @@ export default function Home() {
   async function handleSelectRun(
     runId: string
   ) {
+    if (
+      runId === activeRunId
+    ) {
+      return;
+    }
+
     try {
       setIsLoadingRun(true);
       setError(null);
@@ -452,7 +449,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gray-50 p-8">
       <div className="mx-auto max-w-6xl">
-        <div>
+        <div className="ui-fade-up">
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">
             StableRecon
           </h1>
@@ -464,7 +461,7 @@ export default function Home() {
           </p>
         </div>
 
-        <section className="mt-8 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <section className="ui-fade-up mt-8 rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-shadow duration-200 hover:shadow-md">
           <div className="grid gap-6 md:grid-cols-2">
             <div>
               <label
@@ -524,7 +521,7 @@ export default function Home() {
               !stablecoinFile ||
               isReconciling
             }
-            className="mt-6 rounded-lg bg-black px-5 py-3 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
+            className="mt-6 rounded-lg bg-black px-5 py-3 text-sm font-medium text-white transition-all duration-150 hover:bg-gray-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
           >
             {isReconciling
               ? "Reconciling..."
@@ -532,140 +529,40 @@ export default function Home() {
           </button>
 
           {error && (
-            <div className="mt-4 rounded-lg bg-red-50 p-4 text-sm text-red-700">
+            <div className="ui-fade-in mt-4 rounded-lg bg-red-50 p-4 text-sm text-red-700">
               {error}
             </div>
           )}
         </section>
 
-        <section className="mt-8">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-2xl font-semibold">
-              Run History
-            </h2>
+        <RunHistory
+          runs={runHistory}
+          activeRunId={
+            activeRunId
+          }
+          onSelect={
+            handleSelectRun
+          }
+          isLoadingRun={
+            isLoadingRun
+          }
+        />
 
-            <span className="text-sm text-gray-500">
-              {runHistory.length}{" "}
-              {runHistory.length === 1
-                ? "run"
-                : "runs"}
-            </span>
-          </div>
-
-          {runHistory.length === 0 ? (
-            <div className="rounded-xl border border-gray-200 bg-white p-6 text-sm text-gray-500 shadow-sm">
-              No reconciliation
-              runs yet.
-            </div>
-          ) : (
-            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-              {runHistory.map(
-                (run) => {
-                  const isActive =
-                    run.id ===
-                    activeRunId;
-
-                  return (
-                    <button
-                      key={run.id}
-                      type="button"
-                      onClick={() =>
-                        handleSelectRun(
-                          run.id
-                        )
-                      }
-                      className={`block w-full border-b border-gray-100 p-5 text-left last:border-b-0 hover:bg-gray-50 ${
-                        isActive
-                          ? "bg-gray-50"
-                          : "bg-white"
-                      }`}
-                    >
-                      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <p className="font-semibold text-gray-900">
-                              {new Date(
-                                run.createdAt
-                              ).toLocaleString()}
-                            </p>
-
-                            {isActive && (
-                              <span className="rounded-full bg-black px-2 py-1 text-xs font-medium text-white">
-                                Viewing
-                              </span>
-                            )}
-                          </div>
-
-                          <p className="mt-1 text-sm text-gray-600">
-                            {run.ledgerFileName ??
-                              "Ledger"}{" "}
-                            ↔{" "}
-                            {run.stablecoinFileName ??
-                              "Stablecoin"}
-                          </p>
-                        </div>
-
-                        <div className="flex flex-wrap gap-4 text-sm">
-                          <div>
-                            <p className="text-gray-500">
-                              References
-                            </p>
-
-                            <p className="font-semibold">
-                              {run.total}
-                            </p>
-                          </div>
-
-                          <div>
-                            <p className="text-gray-500">
-                              Exceptions
-                            </p>
-
-                            <p className="font-semibold">
-                              {
-                                run.exceptions
-                              }
-                            </p>
-                          </div>
-
-                          <div>
-                            <p className="text-gray-500">
-                              Open
-                            </p>
-
-                            <p className="font-semibold">
-                              {
-                                run.openExceptions
-                              }
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                  );
-                }
-              )}
-            </div>
-          )}
-        </section>
-
-        {isLoadingSavedRun && (
-          <p className="mt-8 text-sm text-gray-500">
-            Loading saved
-            reconciliation...
-          </p>
+        {(isLoadingSavedRun ||
+          isLoadingRun) && (
+          <LoadingSkeleton />
         )}
 
-        {isLoadingRun && (
-          <p className="mt-8 text-sm text-gray-500">
-            Loading reconciliation
-            run...
-          </p>
-        )}
-
-        {!isLoadingRun &&
+        {!isLoadingSavedRun &&
+          !isLoadingRun &&
           results.length > 0 && (
-            <>
+            <div
+              key={
+                activeRunId ??
+                "current"
+              }
+              className="ui-fade-up"
+            >
               <ReconciliationSummary
                 results={results}
               />
@@ -676,7 +573,7 @@ export default function Home() {
                   setSelectedException
                 }
               />
-            </>
+            </div>
           )}
 
         <ExceptionDrawer

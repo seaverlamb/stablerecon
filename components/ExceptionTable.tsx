@@ -31,8 +31,10 @@ const STATUS_LABELS: Record<
   string
 > = {
   matched: "Matched",
-  amount_mismatch: "Amount mismatch",
-  missing_ledger: "Missing ledger",
+  amount_mismatch:
+    "Amount mismatch",
+  missing_ledger:
+    "Missing ledger",
   missing_stablecoin:
     "Missing stablecoin",
   duplicate: "Duplicate",
@@ -123,27 +125,21 @@ export default function ExceptionTable({
 
           const searchableValues = [
             result.reference,
-
             result
               .ledgerTransaction
               ?.customer,
-
             result
               .ledgerTransaction
               ?.transactionId,
-
             result
               .stablecoinTransaction
               ?.wallet,
-
             result
               .stablecoinTransaction
               ?.txHash,
-
             result
               .stablecoinTransaction
               ?.asset,
-
             result
               .stablecoinTransaction
               ?.network,
@@ -187,14 +183,10 @@ export default function ExceptionTable({
     openCount;
 
   function clearFilters() {
-    setResolutionFilter(
-      "all"
-    );
-
+    setResolutionFilter("all");
     setExceptionTypeFilter(
       "all"
     );
-
     setSearchQuery("");
   }
 
@@ -221,8 +213,7 @@ export default function ExceptionTable({
 
             <p className="mt-1 text-sm text-gray-500">
               {openCount} open ·{" "}
-              {resolvedCount}{" "}
-              resolved
+              {resolvedCount} resolved
             </p>
           </div>
 
@@ -232,7 +223,7 @@ export default function ExceptionTable({
               onClick={
                 clearFilters
               }
-              className="self-start text-sm font-medium text-gray-600 hover:text-black sm:self-auto"
+              className="self-start text-sm font-medium text-gray-600 transition-colors duration-150 hover:text-black active:scale-[0.98] sm:self-auto"
             >
               Clear filters
             </button>
@@ -251,18 +242,14 @@ export default function ExceptionTable({
             <input
               id="exception-search"
               type="search"
-              value={
-                searchQuery
-              }
-              onChange={(
-                event
-              ) =>
+              value={searchQuery}
+              onChange={(event) =>
                 setSearchQuery(
                   event.target.value
                 )
               }
               placeholder="Reference, customer, transaction ID, wallet, or tx hash"
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 outline-none placeholder:text-gray-400 focus:border-gray-500"
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 outline-none transition-all duration-150 placeholder:text-gray-400 focus:border-gray-500 focus:ring-2 focus:ring-gray-100"
             />
           </div>
 
@@ -279,24 +266,20 @@ export default function ExceptionTable({
               value={
                 resolutionFilter
               }
-              onChange={(
-                event
-              ) =>
+              onChange={(event) =>
                 setResolutionFilter(
                   event.target
                     .value as ResolutionFilter
                 )
               }
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 outline-none focus:border-gray-500 lg:w-auto"
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 outline-none transition-all duration-150 focus:border-gray-500 focus:ring-2 focus:ring-gray-100 lg:w-auto"
             >
               <option value="all">
                 All
               </option>
-
               <option value="open">
                 Open
               </option>
-
               <option value="resolved">
                 Resolved
               </option>
@@ -316,32 +299,26 @@ export default function ExceptionTable({
               value={
                 exceptionTypeFilter
               }
-              onChange={(
-                event
-              ) =>
+              onChange={(event) =>
                 setExceptionTypeFilter(
                   event.target
                     .value as ExceptionTypeFilter
                 )
               }
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 outline-none focus:border-gray-500 lg:w-auto"
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 outline-none transition-all duration-150 focus:border-gray-500 focus:ring-2 focus:ring-gray-100 lg:w-auto"
             >
               <option value="all">
                 All types
               </option>
-
               <option value="amount_mismatch">
                 Amount mismatch
               </option>
-
               <option value="missing_ledger">
                 Missing ledger
               </option>
-
               <option value="missing_stablecoin">
                 Missing stablecoin
               </option>
-
               <option value="duplicate">
                 Duplicate
               </option>
@@ -364,20 +341,19 @@ export default function ExceptionTable({
         exceptions
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
         {filteredExceptions.length ===
         0 ? (
-          <div className="p-8 text-center">
+          <div className="ui-fade-in p-8 text-center">
             <p className="font-medium text-gray-900">
-              No exceptions
-              match your search
-              or filters.
+              No exceptions match
+              your search or filters.
             </p>
 
             <p className="mt-1 text-sm text-gray-500">
-              Try another
-              search term or
-              clear the filters.
+              Try another search
+              term or clear the
+              filters.
             </p>
 
             {hasActiveFilters && (
@@ -386,7 +362,7 @@ export default function ExceptionTable({
                 onClick={
                   clearFilters
                 }
-                className="mt-4 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="mt-4 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-all duration-150 hover:bg-gray-50 active:scale-[0.98]"
               >
                 Clear filters
               </button>
@@ -400,28 +376,21 @@ export default function ExceptionTable({
                   <th className="px-4 py-3 font-medium">
                     Reference
                   </th>
-
                   <th className="px-4 py-3 font-medium">
                     Customer
                   </th>
-
                   <th className="px-4 py-3 text-right font-medium">
                     Ledger
                   </th>
-
                   <th className="px-4 py-3 text-right font-medium">
                     Stablecoin
                   </th>
-
                   <th className="px-4 py-3 text-right font-medium">
                     Difference
                   </th>
-
                   <th className="px-4 py-3 font-medium">
-                    Exception
-                    type
+                    Exception type
                   </th>
-
                   <th className="px-4 py-3 font-medium">
                     Resolution
                   </th>
@@ -431,7 +400,8 @@ export default function ExceptionTable({
               <tbody>
                 {filteredExceptions.map(
                   (
-                    result
+                    result,
+                    index
                   ) => {
                     const isResolved =
                       result
@@ -440,15 +410,19 @@ export default function ExceptionTable({
 
                     return (
                       <tr
-                        key={
-                          result.id
-                        }
+                        key={`${result.id}-${resolutionFilter}-${exceptionTypeFilter}-${searchQuery}`}
                         onClick={() =>
                           onSelect(
                             result
                           )
                         }
-                        className="cursor-pointer border-t border-gray-100 hover:bg-gray-50"
+                        style={{
+                          animationDelay: `${Math.min(
+                            index * 30,
+                            150
+                          )}ms`,
+                        }}
+                        className="ui-fade-up cursor-pointer border-t border-gray-100 transition-colors duration-150 hover:bg-gray-50 active:bg-gray-100"
                       >
                         <td className="px-4 py-3 font-medium text-gray-900">
                           {
@@ -499,15 +473,14 @@ export default function ExceptionTable({
 
                         <td className="px-4 py-3 text-gray-700">
                           {STATUS_LABELS[
-                            result
-                              .status
+                            result.status
                           ] ??
                             result.status}
                         </td>
 
                         <td className="px-4 py-3">
                           <span
-                            className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
+                            className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold transition-all duration-200 ${
                               isResolved
                                 ? "bg-green-100 text-green-700"
                                 : "bg-yellow-100 text-yellow-700"

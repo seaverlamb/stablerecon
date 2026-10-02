@@ -1,6 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
 import { ReconciliationResult } from "@/types/transactions";
 import { AIExplanation } from "@/types/ai";
@@ -59,6 +62,9 @@ export default function ExceptionDrawer({
     setResolutionNote,
   ] = useState("");
 
+  const [isVisible, setIsVisible] =
+    useState(false);
+
   useEffect(() => {
     setAnalysis(null);
     setAnalysisError(null);
@@ -67,6 +73,19 @@ export default function ExceptionDrawer({
     setResolutionNote(
       result?.resolutionNote ?? ""
     );
+
+    if (!result) {
+      setIsVisible(false);
+      return;
+    }
+
+    const frame =
+      requestAnimationFrame(() => {
+        setIsVisible(true);
+      });
+
+    return () =>
+      cancelAnimationFrame(frame);
   }, [
     result?.id,
     result?.resolutionNote,
@@ -77,6 +96,14 @@ export default function ExceptionDrawer({
   }
 
   const currentResult = result;
+
+  function handleClose() {
+    setIsVisible(false);
+
+    window.setTimeout(() => {
+      onClose();
+    }, 200);
+  }
 
   async function handleExplain() {
     try {
@@ -209,11 +236,21 @@ export default function ExceptionDrawer({
       <button
         type="button"
         aria-label="Close exception drawer"
-        onClick={onClose}
-        className="absolute inset-0 bg-black/30"
+        onClick={handleClose}
+        className={`absolute inset-0 bg-black/30 transition-opacity duration-200 ${
+          isVisible
+            ? "opacity-100"
+            : "opacity-0"
+        }`}
       />
 
-      <aside className="relative ml-auto h-full w-full max-w-xl overflow-y-auto bg-white p-6 shadow-xl">
+      <aside
+        className={`relative z-10 ml-auto h-full w-full max-w-xl overflow-y-auto bg-white p-6 shadow-2xl transition-transform duration-200 ease-out ${
+          isVisible
+            ? "translate-x-0"
+            : "translate-x-full"
+        }`}
+      >
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-sm text-gray-500">
@@ -227,8 +264,8 @@ export default function ExceptionDrawer({
 
           <button
             type="button"
-            onClick={onClose}
-            className="rounded border border-gray-300 px-3 py-2 text-sm"
+            onClick={handleClose}
+            className="rounded-lg border border-gray-300 px-3 py-2 text-sm transition-all duration-150 hover:bg-gray-50 active:scale-[0.97]"
           >
             Close
           </button>
@@ -254,7 +291,12 @@ export default function ExceptionDrawer({
               </p>
 
               <span
-                className={`mt-1 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
+                key={
+                  isResolved
+                    ? "resolved"
+                    : "open"
+                }
+                className={`ui-scale-in mt-1 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold transition-colors duration-200 ${
                   isResolved
                     ? "bg-green-100 text-green-700"
                     : "bg-yellow-100 text-yellow-700"
@@ -269,7 +311,7 @@ export default function ExceptionDrawer({
         </section>
 
         <div className="mt-6 grid gap-6">
-          <section className="rounded-lg border border-gray-200 p-5">
+          <section className="rounded-lg border border-gray-200 p-5 transition-shadow duration-200 hover:shadow-sm">
             <h3 className="font-semibold">
               Internal Ledger
             </h3>
@@ -280,7 +322,6 @@ export default function ExceptionDrawer({
                   <dt className="text-gray-500">
                     Transaction ID
                   </dt>
-
                   <dd className="font-medium">
                     {
                       currentResult
@@ -294,7 +335,6 @@ export default function ExceptionDrawer({
                   <dt className="text-gray-500">
                     Customer
                   </dt>
-
                   <dd className="font-medium">
                     {
                       currentResult
@@ -308,7 +348,6 @@ export default function ExceptionDrawer({
                   <dt className="text-gray-500">
                     Amount
                   </dt>
-
                   <dd className="font-medium">
                     {formatMoney(
                       currentResult
@@ -325,7 +364,6 @@ export default function ExceptionDrawer({
                   <dt className="text-gray-500">
                     Date
                   </dt>
-
                   <dd className="font-medium">
                     {
                       currentResult
@@ -339,7 +377,6 @@ export default function ExceptionDrawer({
                   <dt className="text-gray-500">
                     Reference
                   </dt>
-
                   <dd className="font-medium">
                     {
                       currentResult
@@ -357,7 +394,7 @@ export default function ExceptionDrawer({
             )}
           </section>
 
-          <section className="rounded-lg border border-gray-200 p-5">
+          <section className="rounded-lg border border-gray-200 p-5 transition-shadow duration-200 hover:shadow-sm">
             <h3 className="font-semibold">
               Stablecoin Transaction
             </h3>
@@ -368,7 +405,6 @@ export default function ExceptionDrawer({
                   <dt className="text-gray-500">
                     Amount
                   </dt>
-
                   <dd className="font-medium">
                     {formatMoney(
                       currentResult
@@ -382,7 +418,6 @@ export default function ExceptionDrawer({
                   <dt className="text-gray-500">
                     Asset
                   </dt>
-
                   <dd className="font-medium">
                     {
                       currentResult
@@ -396,7 +431,6 @@ export default function ExceptionDrawer({
                   <dt className="text-gray-500">
                     Network
                   </dt>
-
                   <dd className="font-medium">
                     {
                       currentResult
@@ -410,7 +444,6 @@ export default function ExceptionDrawer({
                   <dt className="text-gray-500">
                     Date
                   </dt>
-
                   <dd className="font-medium">
                     {
                       currentResult
@@ -424,7 +457,6 @@ export default function ExceptionDrawer({
                   <dt className="text-gray-500">
                     Wallet
                   </dt>
-
                   <dd className="break-all font-medium">
                     {
                       currentResult
@@ -438,7 +470,6 @@ export default function ExceptionDrawer({
                   <dt className="text-gray-500">
                     Transaction Hash
                   </dt>
-
                   <dd className="break-all font-medium">
                     {
                       currentResult
@@ -456,7 +487,7 @@ export default function ExceptionDrawer({
             )}
           </section>
 
-          <section className="rounded-lg border border-gray-200 p-5">
+          <section className="rounded-lg border border-gray-200 p-5 transition-shadow duration-200 hover:shadow-sm">
             <h3 className="font-semibold">
               Difference
             </h3>
@@ -481,7 +512,7 @@ export default function ExceptionDrawer({
                 type="button"
                 onClick={handleExplain}
                 disabled={isAnalyzing}
-                className="rounded bg-black px-3 py-2 text-sm text-white disabled:opacity-50"
+                className="rounded-lg bg-black px-3 py-2 text-sm text-white transition-all duration-150 hover:bg-gray-800 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isAnalyzing
                   ? "Analyzing..."
@@ -489,15 +520,38 @@ export default function ExceptionDrawer({
               </button>
             </div>
 
+            {isAnalyzing && (
+              <div
+                className="mt-5 space-y-3"
+                aria-label="Generating AI analysis"
+              >
+                <div className="h-3 w-2/3 animate-pulse rounded bg-gray-200" />
+                <div className="h-3 w-full animate-pulse rounded bg-gray-200" />
+                <div className="h-3 w-5/6 animate-pulse rounded bg-gray-200" />
+                <div className="mt-6 h-3 w-1/3 animate-pulse rounded bg-gray-200" />
+                <div className="h-3 w-4/5 animate-pulse rounded bg-gray-200" />
+                <div className="h-3 w-3/4 animate-pulse rounded bg-gray-200" />
+              </div>
+            )}
+
             {analysisError && (
-              <p className="mt-4 text-sm text-red-600">
+              <p className="ui-fade-in mt-4 text-sm text-red-600">
                 {analysisError}
               </p>
             )}
 
             {analysis && (
-              <div className="mt-5 space-y-5 text-sm">
-                <div>
+              <div
+                className="mt-5 space-y-5 text-sm"
+                aria-live="polite"
+              >
+                <div
+                  className="ui-fade-up"
+                  style={{
+                    animationDelay:
+                      "0ms",
+                  }}
+                >
                   <p className="font-medium">
                     Summary
                   </p>
@@ -507,7 +561,13 @@ export default function ExceptionDrawer({
                   </p>
                 </div>
 
-                <div>
+                <div
+                  className="ui-fade-up"
+                  style={{
+                    animationDelay:
+                      "50ms",
+                  }}
+                >
                   <p className="font-medium">
                     Possible causes
                   </p>
@@ -523,7 +583,13 @@ export default function ExceptionDrawer({
                   </ul>
                 </div>
 
-                <div>
+                <div
+                  className="ui-fade-up"
+                  style={{
+                    animationDelay:
+                      "100ms",
+                  }}
+                >
                   <p className="font-medium">
                     Recommended next step
                   </p>
@@ -535,7 +601,13 @@ export default function ExceptionDrawer({
                   </p>
                 </div>
 
-                <div>
+                <div
+                  className="ui-fade-up"
+                  style={{
+                    animationDelay:
+                      "150ms",
+                  }}
+                >
                   <p className="font-medium">
                     Confidence
                   </p>
@@ -547,7 +619,7 @@ export default function ExceptionDrawer({
                   </p>
                 </div>
 
-                <p className="text-xs text-gray-500">
+                <p className="ui-fade-in text-xs text-gray-500">
                   AI-generated investigation
                   guidance. Review before
                   taking action.
@@ -563,7 +635,8 @@ export default function ExceptionDrawer({
               </h3>
 
               <span
-                className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                key={`resolution-${isResolved}`}
+                className={`ui-scale-in rounded-full px-3 py-1 text-xs font-semibold ${
                   isResolved
                     ? "bg-green-100 text-green-700"
                     : "bg-yellow-100 text-yellow-700"
@@ -576,7 +649,7 @@ export default function ExceptionDrawer({
             </div>
 
             {isResolved ? (
-              <div className="mt-4 space-y-4 text-sm">
+              <div className="ui-fade-up mt-4 space-y-4 text-sm">
                 <div>
                   <p className="font-medium">
                     Resolution note
@@ -624,7 +697,7 @@ export default function ExceptionDrawer({
                   }
                   rows={4}
                   placeholder="Describe what you found and how this exception was resolved."
-                  className="mt-2 w-full rounded-lg border border-gray-300 p-3 text-sm outline-none focus:border-gray-500"
+                  className="mt-2 w-full rounded-lg border border-gray-300 p-3 text-sm outline-none transition-all duration-150 focus:border-gray-500 focus:ring-2 focus:ring-gray-100"
                 />
 
                 <button
@@ -635,7 +708,7 @@ export default function ExceptionDrawer({
                   disabled={
                     !resolutionNote.trim()
                   }
-                  className="mt-4 w-full rounded-lg bg-black px-4 py-3 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
+                  className="mt-4 w-full rounded-lg bg-black px-4 py-3 text-sm font-medium text-white transition-all duration-150 hover:bg-gray-800 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Resolve exception
                 </button>
